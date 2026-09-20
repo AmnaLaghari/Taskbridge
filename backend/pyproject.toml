@@ -1,0 +1,53 @@
+[project]
+name = "taskbridge"
+version = "0.1.0"
+description = "Bidirectional sync between GitHub Issues and Todoist"
+readme = "../README.md"
+license = "MIT"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "django>=5.2,<5.3",
+    "djangorestframework>=3.16",
+    "django-environ>=0.12",
+    "psycopg[binary]>=3.2",
+    "celery[redis]>=5.5",
+    "redis>=5.2",
+    "httpx>=0.28",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-django>=4.10",
+    "respx>=0.22",
+    "ruff>=0.12",
+    "mypy>=1.16",
+    "django-stubs[compatible-mypy]>=5.2",
+    "djangorestframework-stubs>=3.16",
+    "pre-commit>=4.2",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["**/migrations/**"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "DJ", "RUF"]
+
+[tool.mypy]
+strict = true
+plugins = ["mypy_django_plugin.main"]
+exclude = ["migrations/"]
+
+[[tool.mypy.overrides]]
+module = ["environ.*", "celery.*"]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "taskbridge.settings"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "taskbridge.settings"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"

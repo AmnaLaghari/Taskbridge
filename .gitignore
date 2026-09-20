@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Node (frontend, Day 8)
+node_modules/
+.next/
+
+# Env and editors
+.env
+.vscode/
+.idea/
+.DS_Store
