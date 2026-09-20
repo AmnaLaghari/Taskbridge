@@ -31,6 +31,18 @@ hiding them.
 - Before starting new work, check the current branch. If it is `main`, or still holds the
   last feature, create a fresh branch rather than adding to it.
 - `main` only moves through merged PRs — and only when I ask for the merge.
+
+The loop for every piece of work, no steps skipped:
+
+1. `git switch main && git pull` — start from the current `main`.
+2. `git switch -c feat/<slug>` — a fresh branch.
+3. Build it, with tests, until ruff, mypy and pytest all pass.
+4. Commit (ask me first), then push the branch.
+5. Open a PR describing what changed and why, and wait for CI to go green.
+6. I merge it, or tell you to. Never self-merge without being asked.
+7. Delete the merged branch, return to step 1 for the next piece of work.
+
+Never add a second feature to a branch that already has a PR open.
 - Commit messages: imperative subject under 72 chars, then a body explaining *why*.
   End with the Co-Authored-By trailer.
 
