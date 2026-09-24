@@ -50,6 +50,12 @@ module = ["environ.*", "celery.*"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
+# ModelAdmin and TabularInline are generic to django-stubs but not subscriptable at
+# runtime, so admin classes cannot name their model. Everything else stays strict.
+module = ["sync.admin"]
+disallow_any_generics = false
+
+[[tool.mypy.overrides]]
 # Celery ships no type information, so @shared_task is an untyped decorator and
 # everything it wraps is treated as untyped. Confined to this module, which holds
 # nothing but thin task wrappers; the logic they call is checked normally.

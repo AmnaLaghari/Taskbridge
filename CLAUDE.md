@@ -16,10 +16,15 @@ hiding them.
 
 ### Git
 
-- **Never `git commit` unless I ask.** Show me what changed and let me decide.
-- **Never `git push`, force-push, or open a PR unless I ask.**
+- **I do all the committing. You never run `git commit`** — not even when I approve the
+  work, not even "so the branch is clean". Leave the changes in the working tree and tell
+  me what is there.
+- **Never `git push`, force-push, open a PR, or merge.** Those are mine too.
 - Never `git reset --hard`, `git checkout --`, `git clean`, or discard uncommitted work
   without asking first.
+- Read-only git is fine without asking: `status`, `diff`, `log`, `branch`, `show`, `fetch`.
+- Creating a branch and rebasing onto `main` are fine when I ask for them; they do not
+  write history I have not seen.
 - **Never commit directly to `main`.** Every piece of work gets its own branch, created
   from an up-to-date `main`:
   - `feat/<slug>` — new behaviour (`feat/canonical-model`, `feat/outbox-worker`)
@@ -32,19 +37,21 @@ hiding them.
   last feature, create a fresh branch rather than adding to it.
 - `main` only moves through merged PRs — and only when I ask for the merge.
 
-The loop for every piece of work, no steps skipped:
+The loop for every piece of work, and who does what:
 
-1. `git switch main && git pull` — start from the current `main`.
-2. `git switch -c feat/<slug>` — a fresh branch.
-3. Build it, with tests, until ruff, mypy and pytest all pass.
-4. Commit (ask me first), then push the branch.
-5. Open a PR describing what changed and why, and wait for CI to go green.
-6. I merge it, or tell you to. Never self-merge without being asked.
-7. Delete the merged branch, return to step 1 for the next piece of work.
+| Step | Who |
+| --- | --- |
+| 1. Start from a current `main`, create `feat/<slug>` | you |
+| 2. Build it, with tests, until ruff, mypy and pytest pass | you |
+| 3. Report what changed and offer a commit message | you |
+| 4. Commit, push, open the PR, merge it, delete the branch | me |
+| 5. Tell you it is merged so you can rebase or start the next branch | me |
 
-Never add a second feature to a branch that already has a PR open.
-- Commit messages: imperative subject under 72 chars, then a body explaining *why*.
-  End with the Co-Authored-By trailer.
+Never add a second feature to a branch whose PR is already open.
+
+When the work is ready, hand me: the list of files changed, a one-line summary, and a
+suggested commit message I can paste — imperative subject under 72 characters, then a
+body explaining *why*, ending with the Co-Authored-By trailer.
 
 ### Environment and secrets
 
