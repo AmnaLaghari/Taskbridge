@@ -65,6 +65,41 @@ Install the git hooks once from the repo root:
 uv run --directory backend pre-commit install
 ```
 
+## Try it against a real repository
+
+Set `GITHUB_TOKEN` (a fine-grained PAT with Issues read/write) and `GITHUB_REPO`
+(`owner/repo`) in `.env`, then poll once:
+
+```bash
+cd backend
+uv run python manage.py sync_now github
+```
+
+```
+created connection for github:owner/sandbox
+polling github:owner/sandbox…
+fetched 3 · created 3 · updated 0 · unchanged 0
+```
+
+Run it again without changing anything and everything reports as unchanged — an
+issue whose synced fields still hash the same is never written twice.
+
+`--reset-cursor` forgets where the last poll got to and reads the repository from the
+beginning; `--account owner/other-repo` polls a different repository.
+
+### Watching it work
+
+The Django admin is the operator view: canonical tasks, their links to each provider,
+inbox deliveries, pending outbox operations and dead letters.
+
+```bash
+uv run python manage.py createsuperuser
+uv run python manage.py runserver
+```
+
+Then open <http://localhost:8000/admin/>. Tasks are read-only there — a canonical task
+with no provider behind it would be a change nobody asked for.
+
 ## Layout
 
 ```
