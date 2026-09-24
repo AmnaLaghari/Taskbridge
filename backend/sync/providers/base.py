@@ -35,14 +35,22 @@ class ProviderMapper(Protocol):
         ...
 
 
-class Provider(ProviderMapper, Protocol):
-    """A mapper plus the API calls the engine needs. Implemented on Days 2 and 3."""
+class ChangeSource(ProviderMapper, Protocol):
+    """A provider we can read changes out of."""
 
     def fetch_changes(
         self, cursor: Mapping[str, Any] | None
     ) -> tuple[Sequence[RemoteTask], dict[str, Any]]:
-        """Return everything changed since `cursor`, and the next cursor."""
+        """Return everything changed since `cursor`, and the next cursor.
+
+        The cursor is opaque to the engine: each provider decides what it needs to
+        resume, and only what it returns here is ever handed back.
+        """
         ...
+
+
+class Provider(ChangeSource, Protocol):
+    """Reading plus writing. The write half lands on Day 3."""
 
     def create(self, snapshot: TaskSnapshot, idempotency_key: str) -> str:
         """Create the task remotely and return its external id."""

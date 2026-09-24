@@ -49,6 +49,13 @@ exclude = ["migrations/"]
 module = ["environ.*", "celery.*"]
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+# Celery ships no type information, so @shared_task is an untyped decorator and
+# everything it wraps is treated as untyped. Confined to this module, which holds
+# nothing but thin task wrappers; the logic they call is checked normally.
+module = ["sync.tasks"]
+disallow_untyped_decorators = false
+
 [tool.django-stubs]
 django_settings_module = "taskbridge.settings"
 

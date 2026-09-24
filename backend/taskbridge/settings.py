@@ -58,6 +58,12 @@ DATABASES = {"default": env.db("DATABASE_URL")}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REDIS_URL: str = env("REDIS_URL")
+
+# Providers. Credentials stay empty by default so the test suite never depends on
+# a real account being configured.
+GITHUB_API_URL: str = env("GITHUB_API_URL", default="https://api.github.com")
+GITHUB_TOKEN: str = env("GITHUB_TOKEN", default="")
+GITHUB_REPO: str = env("GITHUB_REPO", default="")
 CELERY_BROKER_URL = REDIS_URL
 CELERY_TASK_ACKS_LATE = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
