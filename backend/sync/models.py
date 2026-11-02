@@ -141,6 +141,10 @@ class OutboxOp(models.Model):
     payload = models.JSONField(default=dict)
     # Deterministic: enqueueing the same intent twice is a no-op, not a duplicate.
     idempotency_key = models.CharField(max_length=HASH_LENGTH, unique=True)
+    # What this operation is pushing. Recorded on the link once it succeeds, so an
+    # inbound change carrying the same hash can be recognised as our own echo.
+    synced_hash = models.CharField(max_length=HASH_LENGTH, blank=True)
+    canonical_version = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=16, choices=OpStatus.choices, default=OpStatus.PENDING)
     attempts = models.PositiveSmallIntegerField(default=0)
     next_attempt_at = models.DateTimeField(null=True, blank=True)

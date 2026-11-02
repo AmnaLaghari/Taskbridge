@@ -39,7 +39,8 @@ def as_todoist_task(payload: dict[str, Any], task_id: str = "7654321") -> dict[s
         "content": payload["content"],
         "description": payload["description"],
         "is_completed": False,
-        "due": {"date": payload["due_date"]} if payload["due_date"] else None,
+        # A payload without a due date carries the clearing string instead of a null.
+        "due": {"date": payload["due_date"]} if payload.get("due_date") else None,
     }
 
 
@@ -114,7 +115,8 @@ def test_todoist_clears_a_due_date_with_its_magic_string() -> None:
         TaskSnapshot(title="t", body="", status=TaskStatus.OPEN, due_on=None)
     )
 
-    assert cleared["due_date"] is None
+    # Exactly one due field goes over the wire: sending both would be ambiguous.
+    assert "due_date" not in cleared
     assert cleared["due_string"] == "no date"
 
 

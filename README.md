@@ -87,6 +87,16 @@ issue whose synced fields still hash the same is never written twice.
 `--reset-cursor` forgets where the last poll got to and reads the repository from the
 beginning; `--account owner/other-repo` polls a different repository.
 
+Polling stores canonical tasks and queues a push to every other configured provider.
+Those queued operations are sent by the outbox worker:
+
+```bash
+uv run celery -A taskbridge worker -B --loglevel=info
+```
+
+Set `TODOIST_API_TOKEN` and `TODOIST_PROJECT_ID` first, or the operations wait in the
+queue until it is configured.
+
 ### Watching it work
 
 The Django admin is the operator view: canonical tasks, their links to each provider,

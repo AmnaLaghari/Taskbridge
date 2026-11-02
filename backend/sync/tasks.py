@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from celery import shared_task
 
+from .engine.outbox import drain_outbox
 from .engine.polling import poll_connection
 from .models import Connection
-from .providers.factory import build_change_source
+from .providers.factory import build_change_source, build_writers
 
 
 @shared_task(name="sync.poll_connection")
@@ -18,6 +19,17 @@ def poll_connection_task(connection_id: int) -> dict[str, int]:
         "created": result.created,
         "updated": result.updated,
         "unchanged": result.unchanged,
+    }
+
+
+@shared_task(name="sync.drain_outbox")
+def drain_outbox_task() -> dict[str, int]:
+    result = drain_outbox(build_writers())
+    return {
+        "claimed": result.claimed,
+        "succeeded": result.succeeded,
+        "retried": result.retried,
+        "dead_lettered": result.dead_lettered,
     }
 
 

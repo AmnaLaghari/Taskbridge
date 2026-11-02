@@ -10,13 +10,16 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.db.models import F
 
 from ..hashing import synced_fields_hash
 from ..models import Task, TaskLink
+from ..providers import mapper_for
 from ..providers.base import ProviderMapper
 from ..snapshots import RemoteTask, TaskSnapshot
+from .outbox import enqueue_push
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,6 +74,7 @@ def _ingest(mapper: ProviderMapper, remote: RemoteTask, incoming_hash: str) -> I
             last_seen_hash=incoming_hash,
             canonical_version_synced=task.version,
         )
+        _fan_out(task, origin=mapper.name)
         return IngestResult(task=task, created=True, changed=True)
 
     if link.last_seen_hash == incoming_hash:
@@ -88,4 +92,17 @@ def _ingest(mapper: ProviderMapper, remote: RemoteTask, incoming_hash: str) -> I
     link.last_seen_hash = incoming_hash
     link.canonical_version_synced = task.version
     link.save(update_fields=["last_seen_hash", "canonical_version_synced", "updated_at"])
+    _fan_out(task, origin=mapper.name)
     return IngestResult(task=task, created=False, changed=True)
+
+
+def _fan_out(task: Task, *, origin: str) -> None:
+    """Queue a push to every other configured provider.
+
+    Called inside the ingest transaction, so the canonical change and the intent to
+    propagate it commit together — there is no window where one exists without the
+    other. Never queues a push back to where the change came from.
+    """
+    for provider in settings.PUSH_TARGETS:
+        if provider != origin:
+            enqueue_push(task, mapper_for(provider))

@@ -49,16 +49,29 @@ class ChangeSource(ProviderMapper, Protocol):
         ...
 
 
-class Provider(ChangeSource, Protocol):
-    """Reading plus writing. The write half lands on Day 3."""
+class TaskWriter(ProviderMapper, Protocol):
+    """A provider we can push changes to.
+
+    Every method must be safe to call twice: the outbox retries, and a retry after a
+    response was lost must not create a second task.
+    """
 
     def create(self, snapshot: TaskSnapshot, idempotency_key: str) -> str:
-        """Create the task remotely and return its external id."""
+        """Create the task remotely and return its external id.
+
+        `idempotency_key` is stable across retries of the same operation, so a
+        provider that supports request deduplication can hand back the original
+        object instead of making another one.
+        """
         ...
 
     def update(self, external_id: str, snapshot: TaskSnapshot) -> None: ...
 
     def delete(self, external_id: str) -> None: ...
+
+
+class Provider(ChangeSource, TaskWriter, Protocol):
+    """Both halves, plus webhook handling from Day 5."""
 
     def parse_webhook(self, headers: Mapping[str, str], body: bytes) -> Sequence[RemoteTask]: ...
 
